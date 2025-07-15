@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  ldap-web-admin:
+    image: osixia/phpldapadmin
+    container_name: phpldapadmin
+    environment:
+      - PHPLDAPADMIN_HTTPS=false
+      - PHPLDAPADMIN_LDAP_HOSTS=ldap://ldap-server
+    ports:
+      - 8091:80
+
+  ldap-server:
+    image: osixia/openldap
+
+    container_name: openldap
+    environment:
+      - LDAP_ORGANISATION=Internship
+      - LDAP_DOMAIN=internship.test
+      - LDAP_ADMIN_PASSWORD=12345678
+    ports:
+      - 10389:389
+
+  checkmate-db:
+    image: postgres:17
+    container_name: checkmate-db
+    environment:
+      POSTGRES_DB: base_db
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d base_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  checkmate-app:
+    build:
+      context: ./Api
+      dockerfile: Dockerfile
+    container_name: checkmate-app
+    ports:
+      - 5297:80
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__PostgresConnection=Host=checkmate-db;Port=5432;Database=base_db;Username=root;Password=root
+      - Storage__RootPath=/app/media
+    volumes:
+      - ../../Storage:/app/media
+    depends_on:
+      - checkmate-db
+    restart: on-failure:5
+
+  checkmate-auth-server:
+    build:
+      context: ./Identity
+      dockerfile: Dockerfile
+    container_name: checkmate-auth-server
+    ports:
+      - 5184:80
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+      - ASPNETCORE_ENVIRONMENT=Development
+      - IdentityData__ClientId=client
+      - IdentityData__ApiScope=api1
+      - IdentityData__Secret=M5m35GBuKvfdCcI1qrAewFUc65H8jKTrEOhRkTSyzFnFrrilwU4eeQVKfQZEO3EC
+      - LdapConnection__Host=ldap-server
+      - LdapConnection__Port=389
+      - LdapConnection__Password=12345678
+      - LdapConnection__BaseDn=dc=internship,dc=test
+      - LdapConnection__UsersOU=Singularis.Users
+      - LdapConnection__RolesOU=Singularis.Groups
+    depends_on:
+      - ldap-server
+    restart: on-failure:5
+
+volumes:
+  postgres_data:
+
