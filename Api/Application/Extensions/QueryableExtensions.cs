@@ -1,10 +1,23 @@
+using System.Security.Claims;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
+using Domain.Entities;
 using Domain.Enums;
+using Shared;
 
 namespace Application.Extensions;
 
 public static class QueryableExtensions {
+    public static IQueryable<Receipt> ApplyEmployeeReceiptFilter(this IQueryable<Receipt> query, ClaimsPrincipal userInfo) {
+        var uploaderUserId = int.Parse(userInfo.FindFirst(ClaimTypes.NameIdentifier).Value);
+        var uploaderUserRoleName = userInfo.FindFirst(ClaimTypes.Role).Value;
+        if (uploaderUserRoleName == Roles.Employee) {
+            query = query.Where(e => e.UploadedByUserId == uploaderUserId);
+        }
+
+        return query;
+    }
+
     public static IQueryable<T> ApplyFilters<T>(this IQueryable<T> query, KeyValuePair<string, string>[] filters) {
         if (filters.Length == 0) {
             return query;

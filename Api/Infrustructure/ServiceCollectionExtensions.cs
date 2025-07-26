@@ -14,6 +14,9 @@ public static class ServiceCollectionExtensions {
         services.AddOptions<StorageServiceParams>()
             .BindConfiguration(StorageServiceParams.SectionName)
             .ValidateDataAnnotations();
+        services.AddOptions<NextCloudConnectionParams>()
+            .BindConfiguration(NextCloudConnectionParams.SectionName)
+            .ValidateDataAnnotations();
 
         string connection = config.GetConnectionString(CheckMateDbContext.ConnectionFieldName);
         services.AddDbContext<CheckMateDbContext>(options => options.UseNpgsql(connection));
@@ -25,6 +28,8 @@ public static class ServiceCollectionExtensions {
                 .ScanIn(typeof(CheckMateDbContext).Assembly));
 
         services.AddScoped<IStorageService, StandardStorageService>();
+        services.AddScoped<ICloudStorageService, NextCloudStorageService>();
+        services.AddScoped<IReceiptFolderService, ReceiptFolderService>();
 
         return services;
     }

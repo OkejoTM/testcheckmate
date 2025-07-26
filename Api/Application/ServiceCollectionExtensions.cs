@@ -3,6 +3,8 @@ using MediatR;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
+using Shared.Repositories;
+using Shared.Options;
 
 namespace Application;
 
@@ -11,6 +13,10 @@ public static class ServiceCollectionExtensions {
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtensions).Assembly));
 
         services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationPipelineBehavior<,>));
+        services.AddScoped<ILdapRepository, LdapRepository>();
+        services.AddOptions<LdapConnectionParams>()
+            .BindConfiguration(LdapConnectionParams.SectionName)
+            .ValidateDataAnnotations();
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 

@@ -17,7 +17,29 @@ public class ReceiptConfiguration : IEntityTypeConfiguration<Receipt> {
             .HasConversion<string>()
             .HasMaxLength(50);
 
-        builder.HasOne<Receipt>()
+        builder.Property(f => f.UploadedByUserId).HasColumnName("uploaded_by_user_id");
+        builder.Property(f => f.OperationType).HasColumnName("operation_type")
+            .HasConversion<string>()
+            .HasMaxLength(50);
+        builder.Property(f => f.CategoryByStore).HasColumnName("category_by_store")
+            .HasConversion<string>()
+            .HasMaxLength(50);
+        builder.Property(f => f.CategoryByPrice).HasColumnName("category_by_price")
+            .HasConversion<string>()
+            .HasMaxLength(50);
+
+        builder.Property(f => f.Date).HasColumnName("date");
+        builder.Property(f => f.Time).HasColumnName("time");
+        builder.Property(f => f.Total).HasColumnName("total");
+        builder.Property(f => f.FiscalNumber).HasColumnName("fiscal_number");
+        builder.Property(f => f.FiscalDocument).HasColumnName("fiscal_document");
+        builder.Property(f => f.FiscalSign).HasColumnName("fiscal_sign");
+        builder.Property(f => f.INN).HasColumnName("inn");
+        builder.Property(f => f.ReceiptNumber).HasColumnName("receipt_number");
+        builder.Property(f => f.StoreName).HasColumnName("store_name");
+        builder.Property(f => f.VatAmount).HasColumnName("vat_amount");
+
+        builder.HasOne<StoredFile>()
             .WithMany()
             .HasForeignKey(r => r.FileId)
             .HasConstraintName("FK_receipts_stored_files_file_id");

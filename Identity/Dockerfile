@@ -2,12 +2,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app/src
 
-COPY ["Api/Api.csproj", "Api/"]
-COPY ["Dtos/Dtos.csproj", "Dtos/"]
+COPY ["Identity/Api/Api.csproj", "Identity/Api/"]
+COPY ["Identity/Dtos/Dtos.csproj", "Identity/Dtos/"]
+COPY ["Shared/Shared.csproj", "Shared/"]
 
 COPY . .
 
-WORKDIR "/app/src/Api"
+WORKDIR "/app/src/Identity/Api"
 RUN dotnet publish "Api.csproj" -c Release -o /app/publish
 
 # Run application

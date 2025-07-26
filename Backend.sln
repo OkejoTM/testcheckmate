@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Api", "Identity\Api\Api.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dtos", "Identity\Dtos\Dtos.csproj", "{2A524AB6-DADC-428B-9080-3A8D4D1A7AF3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -113,6 +115,18 @@ Global
 		{2A524AB6-DADC-428B-9080-3A8D4D1A7AF3}.Release|x64.Build.0 = Release|Any CPU
 		{2A524AB6-DADC-428B-9080-3A8D4D1A7AF3}.Release|x86.ActiveCfg = Release|Any CPU
 		{2A524AB6-DADC-428B-9080-3A8D4D1A7AF3}.Release|x86.Build.0 = Release|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Debug|x64.Build.0 = Debug|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Debug|x86.Build.0 = Debug|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Release|x64.ActiveCfg = Release|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Release|x64.Build.0 = Release|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Release|x86.ActiveCfg = Release|Any CPU
+		{1FCDB764-FE3E-47ED-B62C-0906AD5E920E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

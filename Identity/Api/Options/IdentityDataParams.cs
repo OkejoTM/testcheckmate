@@ -13,4 +13,7 @@ public class IdentityDataParams {
 
     [Required]
     public string Secret { get; set; }
+
+    [Required]
+    public string IssuerUri { get; set; }
 }

@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 public class CheckMateDbContext : DbContext {
     public static readonly string ConnectionFieldName = "PostgresConnection";
     public DbSet<Receipt> Receipts { set; get; }
+    public DbSet<ReceiptItem> ReceiptItems { set; get; }
 
     public DbSet<StoredFile> StoredFiles { set; get; }
     public CheckMateDbContext(DbContextOptions<CheckMateDbContext> options) : base(options) {}

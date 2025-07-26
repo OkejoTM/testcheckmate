@@ -1,6 +1,37 @@
 version: '3.8'
 
 services:
+  nextcloud-db:
+    image: postgres:16
+    container_name: nextcloud-db
+    restart: always
+    volumes:
+      - nextcloud_db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=password
+    networks:
+      - nextcloud
+
+  nextcloud-app:
+    image: nextcloud:latest
+    container_name: nextcloud-app
+    restart: always
+    ports:
+      - "8080:80"
+    depends_on:
+      - nextcloud-db
+    volumes:
+      - nextcloud_data:/var/www/html
+    environment:
+      - POSTGRES_DB=nextcloud
+      - POSTGRES_USER=nextcloud
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST=nextcloud-db
+    networks:
+      - nextcloud
+
   ldap-web-admin:
     image: osixia/phpldapadmin
     container_name: phpldapadmin
@@ -12,14 +43,16 @@ services:
 
   ldap-server:
     image: osixia/openldap
-
     container_name: openldap
     environment:
       - LDAP_ORGANISATION=Internship
       - LDAP_DOMAIN=internship.test
       - LDAP_ADMIN_PASSWORD=12345678
+      - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
     ports:
       - 10389:389
+    volumes:
+      - ./ldif/setup.ldif:/container/service/slapd/assets/config/bootstrap/ldif/setup.ldif
 
   checkmate-db:
     image: postgres:17
@@ -40,8 +73,8 @@ services:
 
   checkmate-app:
     build:
-      context: ./Api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Api/Dockerfile
     container_name: checkmate-app
     ports:
       - 5297:80
@@ -49,6 +82,13 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__PostgresConnection=Host=checkmate-db;Port=5432;Database=base_db;Username=root;Password=root
+      - IdentityData__ServerAddress=http://checkmate-auth-server:80
+      - LdapConnection__Host=ldap-server
+      - LdapConnection__Port=389
+      - LdapConnection__Password=12345678
+      - LdapConnection__BaseDn=dc=internship,dc=test
+      - LdapConnection__UsersOU=Singularis.Users
+      - LdapConnection__RolesOU=Singularis.Groups
       - Storage__RootPath=/app/media
     volumes:
       - ../../Storage:/app/media
@@ -58,8 +98,8 @@ services:
 
   checkmate-auth-server:
     build:
-      context: ./Identity
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: Identity/Dockerfile
     container_name: checkmate-auth-server
     ports:
       - 5184:80
@@ -69,6 +109,7 @@ services:
       - IdentityData__ClientId=client
       - IdentityData__ApiScope=api1
       - IdentityData__Secret=M5m35GBuKvfdCcI1qrAewFUc65H8jKTrEOhRkTSyzFnFrrilwU4eeQVKfQZEO3EC
+      - IdentityData__IssuerUri=http://checkmate-auth-server:80
       - LdapConnection__Host=ldap-server
       - LdapConnection__Port=389
       - LdapConnection__Password=12345678
@@ -81,4 +122,9 @@ services:
 
 volumes:
   postgres_data:
+  nextcloud_db_data:
+  nextcloud_data:
+
+networks:
+  nextcloud:
 

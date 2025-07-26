@@ -7,6 +7,9 @@ using FluentMigrator.Runner;
 using System.Security.Claims;
 using Microsoft.Extensions.Options;
 using Infrustructure.Options;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi.Models;
+using Api.Filters;
 
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +18,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(opt => {
+    opt.DocumentFilter<AuthTokenDocumentFilter>();
+
+    opt.AddSecurityDefinition("bearerAuth", new OpenApiSecurityScheme {
+        Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        {
+            new OpenApiSecurityScheme {
+                Reference = new OpenApiReference {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "bearerAuth"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddOptions<IdentityDataParams>()
@@ -27,7 +53,9 @@ var identityDataParams = builder.Services.BuildServiceProvider().GetRequiredServ
 builder.Services.AddAuthentication()
     .AddJwtBearer(options => {
         options.Authority = identityDataParams.ServerAddress;
+        options.TokenValidationParameters.ValidIssuer = identityDataParams.ServerAddress;
         options.TokenValidationParameters.ValidateAudience = false;
+        options.TokenValidationParameters.ValidateLifetime = true;
         options.RequireHttpsMetadata = false;
     });
 builder.Services.AddAuthorization(options => {
@@ -46,7 +74,10 @@ builder.Host.UseSerilog((context, services, configuration) => configuration.Read
 
 var app = builder.Build();
 app.UseSwagger();
-app.UseSwaggerUI();
+app.UseSwaggerUI(opt => {
+    opt.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    opt.RoutePrefix = string.Empty;
+});
 
 using (var scope = app.Services.CreateScope()) {
     var migrator = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
@@ -62,7 +93,5 @@ app.MapControllers();
 if (app.Environment.IsDevelopment()) {
     app.MapOpenApi();
 }
-
-app.MapGet("/", () => "hello, world");
 
 app.Run();

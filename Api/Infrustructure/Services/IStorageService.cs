@@ -1,5 +1,4 @@
 using Domain.Entities;
-using Infrustructure.Options;
 
 namespace Infrustructure.Services;
 

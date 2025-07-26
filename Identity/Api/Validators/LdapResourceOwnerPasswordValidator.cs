@@ -5,7 +5,7 @@ using Duende.IdentityServer.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
-using Identity.Api.Repositories;
+using Shared.Repositories;
 
 namespace Identity.Api.Validators;
 
@@ -26,11 +26,10 @@ public class LdapResourceOwnerPasswordValidator : IResourceOwnerPasswordValidato
         }
 
         context.Result = new GrantValidationResult(
-            subject: user.UserName,
+            subject: user.Id.ToString(),
             authenticationMethod: "custom",
             claims: new Claim[] {
                 new Claim(ClaimTypes.Name, user.UserName),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.Role)
             }
         );

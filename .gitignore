@@ -5,6 +5,7 @@
 
 Identity/Api/keys
 Identity/Api/appsettings.json
+Identity/Api/tempkey.jwk
 Api/Api/appsettings.json
 docker-compose.yml
 

@@ -1,5 +1,6 @@
 using Application.Exceptions;
 using Domain.Entities;
+using Domain.Enums;
 using Infrustructure.Database;
 using Infrustructure.Services;
 using Microsoft.Extensions.Logging;
@@ -13,20 +14,20 @@ namespace Application.Handlers.Receipts.EditReceiptState;
 public class EditReceiptStateRequestHandler : BaseRequestHandler<EditReceiptStateRequest, Guid> {
     private readonly CheckMateDbContext _dbContext;
     private readonly IMapper _mapper;
-    private readonly Dictionary<ReceiptState, Func<Receipt, Task<Receipt>>> _handlers;
+    private readonly Dictionary<EReceiptState, Func<Receipt, Task<Receipt>>> _handlers;
 
     public EditReceiptStateRequestHandler(CheckMateDbContext dbContext, IMapper mapper, ILogger<EditReceiptStateRequestHandler> logger)
         : base(logger)
     {
         _dbContext = dbContext;
         _mapper = mapper;
-        _handlers = new Dictionary<ReceiptState, Func<Receipt, Task<Receipt>>> {
-            { ReceiptState.AwaitConfirm, HandleAwaitConfirm },
-            { ReceiptState.AwaitProcess, HandleAwaitProcess },
-            { ReceiptState.Rejected, HandleRejected },
-            { ReceiptState.InProcessing, HandleInProcessing },
-            { ReceiptState.Recognized, HandleRecognized },
-            { ReceiptState.NotRecognized, HandleNotRecognized }
+        _handlers = new Dictionary<EReceiptState, Func<Receipt, Task<Receipt>>> {
+            { EReceiptState.AwaitConfirm, HandleAwaitConfirm },
+            { EReceiptState.AwaitProcess, HandleAwaitProcess },
+            { EReceiptState.Rejected, HandleRejected },
+            { EReceiptState.InProcessing, HandleInProcessing },
+            { EReceiptState.Recognized, HandleRecognized },
+            { EReceiptState.NotRecognized, HandleNotRecognized }
         };
     }
 
@@ -36,7 +37,7 @@ public class EditReceiptStateRequestHandler : BaseRequestHandler<EditReceiptStat
             throw new ObjectNotFoundException($"Receipt #{request.Id} not found.");
         }
 
-        var newState = (ReceiptState)Enum.Parse(typeof(ReceiptState), request.State, true);
+        var newState = (EReceiptState)Enum.Parse(typeof(EReceiptState), request.State, true);
 
         if (!IsValidStateTransition(receipt.State, newState)) {
             _logger.LogError($"Invalid state transition of receipt #{receipt.Id}: {receipt.State} -> {newState}.");
@@ -56,26 +57,26 @@ public class EditReceiptStateRequestHandler : BaseRequestHandler<EditReceiptStat
         return result.Id;
     }
 
-    private bool IsValidStateTransition(ReceiptState currState, ReceiptState newState) {
+    private bool IsValidStateTransition(EReceiptState currState, EReceiptState newState) {
         if (currState == newState) {
             return false;
         }
 
         return (currState, newState) switch {
-            (ReceiptState.AwaitConfirm, ReceiptState.AwaitProcess) => true,
-            (ReceiptState.AwaitConfirm, ReceiptState.Rejected) => true,
+            (EReceiptState.AwaitConfirm, EReceiptState.AwaitProcess) => true,
+            (EReceiptState.AwaitConfirm, EReceiptState.Rejected) => true,
 
-            (ReceiptState.AwaitProcess, ReceiptState.Rejected) => true,
-            (ReceiptState.AwaitProcess, ReceiptState.InProcessing) => true,
+            (EReceiptState.AwaitProcess, EReceiptState.Rejected) => true,
+            (EReceiptState.AwaitProcess, EReceiptState.InProcessing) => true,
 
-            (ReceiptState.InProcessing, ReceiptState.NotRecognized) => true,
-            (ReceiptState.InProcessing, ReceiptState.Recognized) => true,
-            (ReceiptState.InProcessing, ReceiptState.Rejected) => true,
+            (EReceiptState.InProcessing, EReceiptState.NotRecognized) => true,
+            (EReceiptState.InProcessing, EReceiptState.Recognized) => true,
+            (EReceiptState.InProcessing, EReceiptState.Rejected) => true,
 
-            (ReceiptState.Rejected, ReceiptState.AwaitProcess) => true,
+            (EReceiptState.Rejected, EReceiptState.AwaitProcess) => true,
 
-            (ReceiptState.NotRecognized, ReceiptState.Rejected) => true,
-            (ReceiptState.NotRecognized, ReceiptState.Recognized) => true,
+            (EReceiptState.NotRecognized, EReceiptState.Rejected) => true,
+            (EReceiptState.NotRecognized, EReceiptState.Recognized) => true,
 
             _ => false
         };
